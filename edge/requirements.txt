@@ -1,0 +1,7 @@
+ultralytics>=8.3
+scipy
+pyyaml
+requests
+lap>=0.5.12   # utilisé par ByteTrack
+# Raspberry Pi : picamera2 s'installe avec apt (sudo apt install python3-picamera2), pas avec pip
+# ffmpeg (sudo apt install ffmpeg) pour des clips lisibles dans le navigateur

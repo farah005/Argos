@@ -1,0 +1,81 @@
+# Argos device configuration (Raspberry Pi + camera)
+# All threshold values are PROVISIONAL: calibrate them on SCB-Dataset3
+# (calibration/calibrate_scb.py), then on your staged videos.
+
+classroom_device_key: "CHANGE_ME"     # secret: set ARGOS_DEVICE_KEY, or written by install_pi.sh (python -m app.cli create-classroom)
+
+source: 0               # 0 = USB camera; "picamera" = Raspberry Pi camera module; video path; rtsp:// URL
+                        # "phone" = phone camera (test mode); "auto" = picamera if detected, otherwise phone
+sample_fps: 5           # frames analysed per second
+imgsz: 640              # YOLO input size (lower to 480 if the Pi is too slow)
+
+models:
+  pose: yolo11n-pose.pt         # on the Pi: yolo11n-pose_ncnn_model (see edge/export_ncnn.py)
+  detect: yolo11n.pt            # on the Pi: yolo11n_ncnn_model
+  device: cpu
+  person_conf: 0.30
+  phone_det_conf: 0.20          # low detector threshold; the rule threshold is thresholds.phone_conf
+  phone_every_n: 1              # detect phones on 1 frame out of n (2 = faster on the Pi)
+
+backend:
+  url: "http://127.0.0.1:8000"
+  timeout_s: 10
+
+phone_camera:                   # test mode: the app sends frames to the backend, the device reads them
+  poll_s: 0.1                   # wait between two requests when no new frame has arrived
+  timeout_s: 3                  # maximum duration of a backend request
+  alert_box_s: 30               # red box on the preview for 30 s after an alert on this student
+
+thresholds:
+  kp_conf: 0.50         # τkp: minimum keypoint confidence
+  min_shoulder_px: 12   # minimum shoulder width (otherwise the student is too small / poorly seen)
+  phone_conf: 0.35      # minimum phone confidence for the rule
+  d_phone: 1.0          # τd: wrist-phone distance / shoulder width
+  hand_rel_y: 1.6       # wrist at most 1.6 shoulder widths below the shoulders (raised or forward hand)
+  pitch: 0.34           # τpitch: h_pitch below => head down. Calibrated on SCBehavior (400 images,
+                        # Youden's J heads-up "lookup" vs reading/writing: 82% detection, 14% false
+                        # alarms per image). At 0.45, 46% of heads-up students were flagged as down.
+                        # To be confirmed on SCB-Dataset ("bow head") and on the staged videos.
+  phone_owner_consistency: 0.8   # minimum share of frames where the phone belongs to the same student
+  # Possible physical conflict (pose-based rule, PROVISIONAL: tune on staged videos)
+  conflict_dist: 2.5          # two students closer than 2.5 shoulder widths (centre to centre)
+  conflict_wrist_speed: 4.0   # wrist faster than 4 shoulder widths per second
+  conflict_reach: 1.2         # that wrist ends within 1.2 shoulder widths of the other's torso
+
+rules:
+  phone:   {window: 15, k: 10, gap: 3}    # 3 s at 5 fps, at least 2 s of evidence
+  posture: {window: 50, k: 40, gap: 5}    # 10 s at 5 fps, at least 8 s head down
+  conflict: {window: 10, k: 4, gap: 2}    # 2 s at 5 fps, at least 4 fast gestures towards the other student
+  cooldown_s: 30
+  track_lost_frames: 10                   # track lost beyond this => window closed
+
+confidence:
+  # Score = detection confidence x share of the window. For phones, YOLO11n often
+  # gives 0.4-0.7: with 0.85 almost no alert would reach "high".
+  # Starting values below, to be validated on annotated videos.
+  high: 0.60
+  medium: 0.35
+  # Tiers recorded with a clip. Decision of 23 Nov: every detection that is sent (high and medium),
+  # with a notification (backend: ARGOS_NOTIFY_TIERS). Original report: [high] only.
+  clip_tiers: [high, medium]
+
+context:
+  enabled: true
+  camera_position: front        # front = camera above the board; back = camera at the back of the room
+  teacher_zone: []              # normalised polygon [[x,y],...] (0..1) of the platform; empty = no teacher detection
+  board_sensitivity_factor: 0.8 # k multiplied by this factor when the teacher faces the board (never disabled)
+
+clips:
+  dir: clips
+  pre_s: 4
+  post_s: 4
+  width: 640
+  max_age_h: 24                 # security: any clip left on the device for more than 24 h is deleted
+  purge_every_s: 600            # how often this is checked
+  transcode_h264: true          # needs ffmpeg (sudo apt install ffmpeg) for playback in the browser
+
+seats: []                       # optional: normalised seat polygons [[[x,y],...], ...]
+
+camtest:                        # test tool: python -m argos_edge.camtest
+  dark_mean: 10                 # mean brightness (0-255) below which the frame is considered black
+  flat_std: 4                   # standard deviation below which the frame is considered flat (sensor or lens covered)
