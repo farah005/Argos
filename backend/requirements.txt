@@ -1,0 +1,9 @@
+fastapi>=0.110
+uvicorn[standard]
+sqlalchemy>=2.0
+pyjwt
+bcrypt
+python-multipart
+# tests
+pytest
+httpx
