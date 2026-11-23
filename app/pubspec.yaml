@@ -1,0 +1,43 @@
+name: argos_app
+description: Argos - application enseignant (mobile Android/iOS + web)
+publish_to: "none"
+version: 0.3.0+3
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+  web_socket_channel: ^3.0.0
+  shared_preferences: ^2.2.0
+  video_player: ^2.9.0
+  flutter_local_notifications: ^17.2.0
+  web: ^1.0.0
+  camera: ^0.12.0+2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.png
+
+# Icons generated from the logo: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: assets/icon.png
+  android: true
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/icon_foreground.png
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/icon.png
+    background_color: "#FFFFFF"
+    theme_color: "#072349"
