@@ -1,0 +1,16 @@
+[Unit]
+Description=Argos backend (API + application web)
+After=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/argos/backend
+Environment=ARGOS_DATA_DIR=/home/pi/argos-data
+Environment=ARGOS_DB_URL=sqlite:////home/pi/argos-data/argos.db
+Environment=ARGOS_RETENTION_HOURS=24
+Environment=ARGOS_NOTIFY_TIERS=high,medium
+ExecStart=/home/pi/argos/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

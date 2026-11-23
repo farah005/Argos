@@ -1,0 +1,14 @@
+[Unit]
+Description=Argos pipeline caméra
+After=argos-backend.service
+Wants=argos-backend.service
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/argos/edge
+ExecStart=/home/pi/argos/.venv/bin/python -m argos_edge.main --config /home/pi/argos/config/edge.yaml
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
