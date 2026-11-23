@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+.venv/
+.pytest_cache/
+
+# Models (downloaded by Ultralytics, exported on the Pi)
+*.pt
+*_ncnn_model/
+
+# Runtime data and secrets
+*.db
+.argos_secret
+clips/
+
+# Build outputs (rebuilt with flutter build; see README §8.3)
+backend/web/
+app/build/
+app/.dart_tool/
+
+# Calibration datasets (large, under their authors' licences) and results
+calibration/datasets/
+calibration/resultats*/
+
+# Editor tooling
+.github/modernize/
